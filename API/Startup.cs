@@ -19,6 +19,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using API.Extensions;
+using API.Middleware;
 
 namespace API
 {
@@ -28,43 +29,22 @@ namespace API
         public Startup(IConfiguration config)
         {
             _config = config;
-            
+
         }
-
-        // public IConfiguration Configuration { get; }
-
+      
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
 
-          /*  services.AddScoped<ITokenService,TokenService>();
-           
-            services.AddDbContext<DataContext>(options =>
-            {
-                options.UseSqlite(_config.GetConnectionString("DefaultConnection"));
-            });*/
+
             services.AddApplicationServices(_config);
             services.AddIdentityServices(_config);
             services.AddControllers();
-            services.AddCors(); 
+            services.AddCors();
             services.AddSwaggerGen(c =>
               {
                   c.SwaggerDoc("v1", new OpenApiInfo { Title = "API", Version = "v1" });
               });
-
-             /* services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-              .AddJwtBearer(options => 
-              {
-                  options.TokenValidationParameters = new TokenValidationParameters
-                  {
-                      ValidateIssuerSigningKey =true,
-                      IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["TokenKey"])),
-                      ValidateIssuer =false,
-                      ValidateAudience =false
-
-                  };
-              });*/
-
 
         }
 
@@ -73,10 +53,12 @@ namespace API
         {
             if (env.IsDevelopment())
             {
-                app.UseDeveloperExceptionPage();
+               // app.UseDeveloperExceptionPage();
                 app.UseSwagger();
                 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "API v1"));
             }
+
+            app.UseMiddleware<ExceptionMiddleware>();
 
             app.UseHttpsRedirection();
 
